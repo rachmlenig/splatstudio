@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Paint World</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #f0f0f0;
+      font-family: system-ui, sans-serif;
+    }
+
+    #app {
+      display: grid;
+      grid-template-rows: 56px 1fr;
+      grid-template-columns: 90px 1fr 90px;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Top bar */
+    #topbar {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      background: #fafafa;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    #topbar .tool-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .tool-btn {
+      width: 60px;
+      height: 42px;
+      border: none;
+      border-radius: 10px;
+      font-size: 22px;
+      cursor: pointer;
+      background: transparent;
+      transition: background 0.15s, box-shadow 0.15s;
+    }
+
+    .tool-btn.active {
+      background: #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    }
+
+    #clear-btn {
+      width: 60px;
+      height: 42px;
+      border: none;
+      border-radius: 10px;
+      font-size: 22px;
+      cursor: pointer;
+      background: transparent;
+      transition: background 0.15s;
+    }
+
+    #clear-btn:hover {
+      background: #ffe0e0;
+    }
+
+    /* Left sidebar — palette */
+    #palette {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 0;
+      background: #fafafa;
+      border-right: 1px solid #e0e0e0;
+      overflow-y: auto;
+    }
+
+    .swatch {
+      width: 62px;
+      height: 62px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: transform 0.15s, box-shadow 0.15s;
+      position: relative;
+    }
+
+    .swatch.selected {
+      transform: scale(1.1);
+      box-shadow: 0 0 0 3px #fff, 0 0 0 6px #2c2c2c;
+    }
+
+    .swatch.selected::after {
+      content: '✓';
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
+
+    /* Canvas center */
+    #canvas-area {
+      display: flex;
+      align-items: stretch;
+      justify-content: stretch;
+      padding: 12px;
+      background: #e8e8e8;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    #draw-canvas {
+      flex: 1;
+      border-radius: 16px;
+      background: #fff;
+      cursor: none;
+      touch-action: none;
+    }
+
+    /* Splash animation */
+    .splash {
+      position: fixed;
+      pointer-events: none;
+      font-size: 48px;
+      z-index: 9999;
+      animation: splash-pop 0.6s ease-out forwards;
+      transform: translate(-50%, -50%);
+    }
+
+    @keyframes splash-pop {
+      0% { opacity: 1; transform: translate(-50%, -50%) scale(0.3); }
+      40% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5) translateY(-20px); }
+    }
+
+    /* Right sidebar — stamps */
+    #stamps {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 0;
+      background: #fafafa;
+      border-left: 1px solid #e0e0e0;
+      overflow-y: auto;
+    }
+
+    .stamp-btn {
+      width: 62px;
+      height: 62px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      flex-shrink: 0;
+      font-size: 34px;
+      background: #f0f0f0;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .stamp-btn.selected {
+      transform: scale(1.1);
+      box-shadow: 0 0 0 3px #fff, 0 0 0 6px #2c2c2c;
+      background: #e0e0ff;
+    }
+
+    /* Stamp bounce animation */
+    .stamp-bounce {
+      position: fixed;
+      pointer-events: none;
+      font-size: 64px;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      animation: stamp-bounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes stamp-bounce {
+      0% { opacity: 1; transform: translate(-50%, -50%) scale(0); }
+      60% { transform: translate(-50%, -50%) scale(1.15); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="topbar">
+      <div class="tool-group">
+        <button class="tool-btn active" id="paint-btn">🖌️</button>
+        <button class="tool-btn" id="fill-btn">🪣</button>
+      </div>
+      <button id="clear-btn">🧹</button>
+    </div>
+    <div id="palette"></div>
+    <div id="canvas-area">
+      <canvas id="draw-canvas"></canvas>
+    </div>
+    <div id="stamps"></div>
+  </div>
+  <script type="module" src="./src/main.ts"></script>
+</body>
+</html>
