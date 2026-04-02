@@ -3,6 +3,7 @@ import { createPalette } from './palette';
 import { setupCanvas, clearCanvas } from './canvas';
 import { createCursor, updateCursor } from './cursors';
 import { createStampTray } from './stamps';
+import { playClear, playColorPick } from './sounds';
 
 const state: AppState = {
   color: '#E84040',
@@ -28,6 +29,7 @@ const { canvas } = setupCanvas(canvasEl, state, cursorEl);
 
 // Palette — selecting a color deselects stamp
 createPalette(paletteContainer, state, () => {
+  playColorPick();
   // Clear stamp selection UI
   stampsContainer.querySelectorAll('.stamp-btn').forEach((el) => el.classList.remove('selected'));
   updateCursor(cursorEl, state, canvasEl);
@@ -62,4 +64,5 @@ fillBtn.addEventListener('pointerdown', (e) => {
 clearBtn.addEventListener('pointerdown', (e) => {
   e.preventDefault();
   clearCanvas(canvas);
+  playClear();
 });

@@ -1,5 +1,6 @@
 import type { AppState, Point } from './types';
 import { placeStamp, animateStampBounce } from './stamps';
+import { playPaintStart, playFill, playStamp } from './sounds';
 
 function hexToRgb(hex: string): [number, number, number] {
   const n = parseInt(hex.slice(1), 16);
@@ -122,6 +123,7 @@ export function setupCanvas(
       const p = getPoint(e);
       placeStamp(ctx, state.stamp, p);
       animateStampBounce(e.clientX, e.clientY, state.stamp);
+      playStamp();
       return;
     }
 
@@ -129,6 +131,7 @@ export function setupCanvas(
       const p = getPoint(e);
       floodFill(ctx, p.x, p.y, state.color);
       showSplash(e.clientX, e.clientY);
+      playFill();
       return;
     }
 
@@ -137,21 +140,18 @@ export function setupCanvas(
     const p = getPoint(e);
     drawDot(p);
     lastPoint = p;
+    playPaintStart();
     canvas.setPointerCapture(e.pointerId);
   });
 
-  canvas.addEventListener('pointermove', (e) => {
+  document.addEventListener('pointermove', (e) => {
     const rect = canvas.getBoundingClientRect();
     // Update custom cursor position
     cursorEl.style.left = e.clientX + 'px';
     cursorEl.style.top = e.clientY + 'px';
 
     // Show/hide cursor based on whether pointer is over canvas
-    const overCanvas =
-      e.clientX >= rect.left &&
-      e.clientX <= rect.right &&
-      e.clientY >= rect.top &&
-      e.clientY <= rect.bottom;
+    const overCanvas = e.target === canvas;
     cursorEl.style.display = overCanvas ? 'block' : 'none';
 
     if (!state.painting || state.tool !== 'paint') return;

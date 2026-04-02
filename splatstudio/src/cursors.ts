@@ -17,6 +17,9 @@ export function createCursor(): HTMLElement {
 }
 
 export function updateCursor(cursorEl: HTMLElement, state: AppState, canvasEl?: HTMLCanvasElement) {
+  // Hide custom cursor — pointermove will re-show it when over canvas
+  cursorEl.style.display = 'none';
+
   if (state.stamp) {
     // Stamp emoji follows pointer
     cursorEl.style.width = 'auto';
@@ -29,7 +32,6 @@ export function updateCursor(cursorEl: HTMLElement, state: AppState, canvasEl?: 
     cursorEl.textContent = state.stamp;
     if (canvasEl) canvasEl.style.cursor = 'none';
   } else if (state.tool === 'fill') {
-    cursorEl.style.display = 'none';
     cursorEl.textContent = '';
     if (canvasEl) canvasEl.style.cursor = 'crosshair';
   } else {

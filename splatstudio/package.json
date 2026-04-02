@@ -1,15 +1,14 @@
 {
   "name": "splatstudio",
-  "module": "index.ts",
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "bun --hot server.ts"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
+    "vite": "^8.0.3",
     "typescript": "^5"
   }
 }
